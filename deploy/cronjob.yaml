@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kube-cleaner-cron
+  namespace: kube-system
+spec:
+  schedule: "0 */6 * * *" # Run every 6 hours
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: kube-cleaner-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: cleaner
+              image: ghcr.io/txltedxgod/kube-cleaner:latest
+              args: ["--webhook-url=$(WEBHOOK_URL)"]
+              env:
+                - name: WEBHOOK_URL
+                  value: ""
